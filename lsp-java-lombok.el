@@ -3,7 +3,7 @@
 ;; Copyright (C) 2021 Kevin Ziegler
 ;;
 ;; Author: Kevin Ziegler <https://github.com/kevinziegler>
-;; Maintainer: Kevin Ziegler <ziegler.kevin@heb.com>
+;; Maintainer: Kevin Ziegler
 ;; Created: February 12, 2021
 ;; Modified: February 12, 2021
 ;; Version: 0.0.1
@@ -13,41 +13,53 @@
 ;; This file is not part of GNU Emacs.
 ;;
 ;;; Commentary:
+;;  Helper library for setting up Lombok with LSP-java
 ;;
-;;  Description
-;;
-;;; Code:
-
-;;; lsp-java-lombok --- Set up Lombok for LSP
-;;; Commentary:
-;;; Helper library for setting up lombok with LSP-java
 ;;; Code:
 (require 'lsp-java)
-
-(defvar lsp-java-lombok-jar-url "https://projectlombok.org/downloads/lombok.jar"
-  "Source URL for downloading the Lombok JAR.")
-
-(defvar lsp-java-lombok-jar-path (concat user-emacs-directory "lombok.jar")
-  "Path on disk for the Lombok jar.")
 
 (defvar lsp-java-lombok-enabled nil
   "Indicates the LSP server should be started with Lombok.")
 
+(defvar lsp-java-lombok-version nil
+  "When non-nil, use the specified Lombok version, otherwise use the latest.")
+
+(defvar lsp-java-lombok-jar-url-base "https://projectlombok.org/downloads/"
+  "The base path to download Lombok jars from.")
+
+(defvar lsp-java-lombok-dir user-emacs-directory
+  "The path on disk where lombok jars are saved.")
+
+(defun lsp-java-lombok-jar-file ()
+  "Get the filename for the Lombok jar."
+  (concat "lombok"
+          (when lsp-java-lombok-version "-")
+          lsp-java-lombok-version
+          ".jar"))
+
+(defun lsp-java-lombok-jar-url ()
+  "Generate the download URL for downloading the Lombok jar."
+  (concat lsp-java-lombok-jar-url-base (lsp-java-lombok-jar-file)))
+
+(defun lsp-java-lombok-jar-path ()
+  "Generate the path on disk for the Lombok jar."
+  (concat user-emacs-directory (lsp-java-lombok-jar-file)))
+
 (defun lsp-java-lombok-download-jar ()
-  "Download lombok jar for use with LSP."
-  (url-copy-file lsp-java-lombok-jar-url lsp-java-lombok-jar-path))
+  "Download the latest lombok jar for use with LSP."
+  (url-copy-file (lsp-java-lombok-jar-url) (lsp-java-lombok-jar-path)))
 
 (defun lsp-java-lombok-vmarg ()
   "Create JVM startup args to load Lombok with the LSP server."
-  (concat "-javaagent:" lsp-java-lombok-jar-path))
+  (concat "-javaagent:" (lsp-java-lombok-jar-path)))
 
 (defun lsp-java-lombok-append-vmargs ()
   "Apply lombok args to lsp-java-vmargs."
   (setq lsp-java-vmargs (append lsp-java-vmargs (lsp-java-lombok-vmarg))))
 
 (defun lsp-java-lombok-setup ()
-  "Download Lombok if it has not been downloaded already."
-  (when (not (file-exists-p lsp-java-lombok-jar-path))
+  "Download Lombok if it hasn't been downloaded already."
+  (when (not (file-exists-p (lsp-java-lombok-jar-path)))
     (message "Could not find lombok for lsp-java.  Downloading...")
     (lsp-java-lombok-download-jar)))
 
