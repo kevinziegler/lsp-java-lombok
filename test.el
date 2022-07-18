@@ -19,3 +19,13 @@
                            (should (equal src "https://test.com/lombok-1.0.jar"))
                            (should (equal dest "/test/path/lombok-1.0.jar")))
             (lsp-java-lombok/download-jar))))
+
+(ert-deftest lsp-java-lombok/append-vmargs-in-home-dir ()
+  "VM arg for Lombok is added correctly and resolving the path."
+  (setq-local lsp-java-vmargs '(foo))
+  (setq-local user-emacs-directory "~/test/lombok/")
+  (lsp-java-lombok/append-vmargs)
+  (should (equal
+           lsp-java-vmargs
+           (list 'foo (concat "-javaagent:" (getenv "HOME") "/test/lombok/lombok.jar"))))
+  )

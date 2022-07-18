@@ -52,8 +52,9 @@
 (defun lsp-java-lombok/append-vmargs ()
   "Apply lombok args to lsp-java-vmargs."
   (setq lsp-java-vmargs
-        (append lsp-java-vmargs
-                (concat "-javaagent:" (lsp-java-lombok/jar-path)))))
+        (append
+         lsp-java-vmargs
+         (list (concat "-javaagent:" (expand-file-name (lsp-java-lombok/jar-path)))))))
 
 (defun lsp-java-lombok/setup ()
   "Download Lombok if it hasn't been downloaded already."
